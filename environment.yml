@@ -1,0 +1,5 @@
+name: auto_conda
+channels:
+  - conda-forge
+  - defaults
+prefix: /home/max/miniconda3/envs/auto_conda
