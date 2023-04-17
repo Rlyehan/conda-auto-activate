@@ -1,7 +1,35 @@
 #!/bin/bash
 
+conda_auto_env() {
+  if [ "\$0" = "\${BASH_SOURCE[0]}" ] || [ "\$0" = "\${(%):-%x}" ]; then
+    return 0
+  fi
+
 # Define your base path
-export CONDA_BASE_PATH="$HOME/repos"
+CONDA_BASE_PATH="$HOME/Developer/python"
+
+# Check the current shell
+current_shell="$(basename "$SHELL")"
+
+# Check the operating system
+current_os="$(uname)"
+
+# Check for macOS and zsh
+if [ "$current_os" != "Darwin" ] || [ "$current_shell" != "zsh" ]; then
+    echo "Error: conda_auto_env requires macOS and zsh."
+    exit 1
+fi
+
+config_file="${HOME}/.${current_shell}rc"
+
+# Check if the code has already been added to the config file
+if ! grep -q "conda_auto_env" "$config_file"; then
+    # Add the code to the configuration file
+    echo "Installing conda_auto_env to ${config_file}..."
+
+    cat <<'EOT' >> "$config_file"
+# --- conda_auto_env ---
+export CONDA_BASE_PATH="$CONDA_BASE_PATH"
 
 # Function to check if the current directory is under the base directory
 function is_inside_base_path() {
@@ -20,7 +48,7 @@ function activate_conda_environment() {
 
         while [[ "$current_dir" != "/" && "$current_dir" != "$CONDA_BASE_PATH" ]]; do
             if [[ -f "$current_dir/environment.yml" ]]; then
-                local env_name=$(grep -oP '(?<=name: ).*' "$current_dir/environment.yml")
+                local env_name=$(sed -n 's/^name: //p' "$current_dir/environment.yml")
 
                 if [[ "$env_name" != "" ]]; then
                     echo "Activating conda environment: $env_name"
@@ -50,5 +78,18 @@ function deactivate_conda_environment() {
         unset CONDA_ACTIVE_DIR
     fi
 }
-activate_conda_environment
-deactivate_conda_environment
+
+# Function to wrap 'cd' command and call deactivate_conda_environment and activate_conda_environment
+function cd_with_conda_environment() {
+    builtin cd "$@" && deactivate_conda_environment && activate_conda_environment
+}
+
+# Alias 'cd' to the new function
+alias cd="cd_with_conda_environment"
+EOT
+    echo "Successfully installed conda_auto_env to ${config_file}."
+else
+    echo "conda_auto_env is already installed in ${config_file}."
+fi
+}
+conda_auto_env
