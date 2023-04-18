@@ -31,3 +31,7 @@ To uninstall conda_auto_env, follow these steps:
 Save the remove_conda_auto_env script to a directory of your choice.
 Run the script with the command source /path/to/remove_conda_auto_env.sh.
 The script will remove the relevant lines of code from your shell configuration file (e.g., .zshrc or .bashrc) and uninstall conda_auto_env.
+
+## How to create an evnvironment.yml
+
+[Link](https://repo2docker.readthedocs.io/en/latest/howto/export_environment.html)
